@@ -1,0 +1,13 @@
+# Tomcat
+server:
+  port: 8080
+
+# Spring
+spring: 
+  application:
+    # 应用名称
+    name: ruoyi-gateway
+  profiles:
+    # 环境配置
+    active: @env-name@
+#    active: tj

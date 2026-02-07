@@ -1,0 +1,12 @@
+# Tomcat
+server:
+  port: 9401
+
+# Spring
+spring: 
+  application:
+    # 应用名称
+    name: tg-msg-push
+  profiles:
+    # 环境配置
+    active: @env-name@

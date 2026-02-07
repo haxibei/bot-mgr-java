@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.db.mapper.DataInfoMapper">
+
+    <select id="loadPushData" resultType="com.ruoyi.db.domain.DataInfo">
+        select b.*, a.user_id from agent_bind_info a
+        left join data_info b on a.agent_code = b.agent_code and a.domain = b.domain
+        where b.data_date = #{date} and a.user_id &lt; 0 and pause_state = 0
+    </select>
+
+    <select id="getConvertConfig" resultType="com.ruoyi.model.DataScore" parameterType="java.lang.String">
+        select config_value from sys_config where config_key = concat('convert_config_', #{botId})
+    </select>
+    <select id="getRenewConfig" resultType="com.ruoyi.model.DataScore" parameterType="java.lang.String">
+        select config_value from sys_config where config_key = concat('renew_config_', #{botId})
+    </select>
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.db.mapper.AgentBindInfoMapper">
+    <update id="pauseSendMsg" parameterType="java.lang.Long">
+        update agent_bind_info set pause_state = 1 where user_id = #{userId}
+    </update>
+    <update id="startSendMsg" parameterType="java.lang.Long">
+        update agent_bind_info set pause_state = 0 where user_id = #{userId}
+    </update>
+
+    <delete id="delData">
+        delete from agent_bind_info where user_id = #{userId} and agent_code = #{agentCode} and `domain` = #{domain} and bot_id = #{botId}
+    </delete>
+    <select id="selectAllGroup" resultType="java.lang.String">
+        select distinct user_id from agent_bind_info where bot_id = #{botId} and user_id &lt; 0 and pause_state = 0
+    </select>
+</mapper>
