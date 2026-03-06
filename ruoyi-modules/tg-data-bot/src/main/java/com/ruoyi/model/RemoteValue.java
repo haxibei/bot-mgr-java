@@ -5,9 +5,9 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RemoteValue {
+public class RemoteValue<T> {
 
-    private List<RemoteRowData> list;
+    private List<T> list;
 
     private RemoteRowData footer;
 

@@ -48,6 +48,11 @@ public class DataInfo extends BaseEntity
     @TableField(exist = false)
     private Long userId;
 
+    @ApiModelProperty(value = "代理层级    默认  0")
+    private Integer level;
+
+    private String parentAgentCode;
+
     private String botId;
 
     @Override
@@ -59,7 +64,6 @@ public class DataInfo extends BaseEntity
         if(registerNum == null || registerNum == 0) {
             return 0;
         }
-
         return effectiveNum == null || effectiveNum == 0 ? 0 : effectiveNum * 100 / registerNum;
     }
 
@@ -67,7 +71,6 @@ public class DataInfo extends BaseEntity
         if(effectiveNum == null || effectiveNum == 0) {
             return 0;
         }
-
         return repeatNum == null || repeatNum == 0 ? 0 : repeatNum * 100 / effectiveNum;
     }
 }

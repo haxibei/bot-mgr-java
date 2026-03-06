@@ -1,6 +1,7 @@
 package com.ruoyi.updateshandlers;
 
 import com.ruoyi.common.core.utils.DateUtils;
+import com.ruoyi.utils.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,14 @@ public class CommonHandler {
             if (message.getChatId() > 0 && !cmdUtil.getUserStateForCommandsBot(message.getFrom().getId())) {
                 return;
             }
+
+            //Y1123Bot 要求 只要在群里回复消息
+//            String botId = ThreadUtil.getBotId();
+//
+//            if(message.getChatId() > 0 && "8132308359".equals(botId)) {
+//                log.info("Y1123Bot 机器人不允许私聊");
+//                return;
+//            }
 
             if (message.hasText()) {
                 KeyBoardCmd cmd = KeyBoardCmd.getByText(message.getText());

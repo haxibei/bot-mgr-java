@@ -1,14 +1,13 @@
 package com.ruoyi.model;
 
 import lombok.Data;
-import org.apache.poi.ss.formula.functions.T;
 
 @Data
-public class RemoteResp<T> {
+public class RemoteLv1Resp {
 
     private Boolean success;
 
-    private RemoteValue<T> value;
+    private RemoteRowData value;
 
     private String errorCode;
 

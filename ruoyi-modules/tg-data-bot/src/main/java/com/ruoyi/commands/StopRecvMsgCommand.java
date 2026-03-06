@@ -35,7 +35,7 @@ public class StopRecvMsgCommand extends BotCommand {
     private BotConfig botConfig;
 
     public StopRecvMsgCommand(BotConfig botConfig) {
-        super("stop_recv_msg", "With this command you can stop receive group msg from Bot");
+        super("stop_recv_msg", "关闭机器人消息推送");
         this.botConfig = botConfig;
     }
 

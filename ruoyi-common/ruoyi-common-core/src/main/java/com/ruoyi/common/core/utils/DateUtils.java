@@ -3,11 +3,10 @@ package com.ruoyi.common.core.utils;
 import java.lang.management.ManagementFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.Date;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
@@ -183,5 +182,15 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils
 
     public static String getYesterDay() {
         return parseDateToStr(YYYY_MM_DD, toDate(LocalDate.now(ZoneId.of("Asia/Shanghai")).plusDays(-1)));
+    }
+
+    private static final DateTimeFormatter YM_FMT =
+            DateTimeFormatter.ofPattern("uuuu-MM").withResolverStyle(ResolverStyle.STRICT);
+
+
+    public static boolean isMonth(String date) {
+        if (date == null) return false;
+        try { YearMonth.parse(date, YM_FMT); return true; }
+        catch (DateTimeParseException e) { return false; }
     }
 }

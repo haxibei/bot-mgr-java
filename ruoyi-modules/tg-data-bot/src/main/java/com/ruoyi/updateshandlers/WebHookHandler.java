@@ -3,19 +3,28 @@ package com.ruoyi.updateshandlers;
 import com.ruoyi.commands.StartRecvMsgCommand;
 import com.ruoyi.commands.StopRecvMsgCommand;
 import com.ruoyi.config.properties.BotConfig;
+import com.ruoyi.utils.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import com.ruoyi.commands.StartCommand;
 import com.ruoyi.config.properties.BotProperties;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramWebhookCommandBot;
+import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.commands.DeleteMyCommands;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.updates.DeleteWebhook;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author pithera
@@ -23,7 +32,7 @@ import java.io.Serializable;
  * Simple Webhook example
  */
 @Slf4j
-public class WebHookHandler extends TelegramWebhookCommandBot {
+public class WebHookHandler extends TelegramWebhookCommandBot implements ISetCommand {
 
     private TelegramClient telegramClient;
 
@@ -40,9 +49,20 @@ public class WebHookHandler extends TelegramWebhookCommandBot {
         this.webhookUrl = webhookUrl;
         this.botConfig = botConfig;
 
-        register(new StartCommand(botConfig));
-        register(new StartRecvMsgCommand(botConfig));
-        register(new StopRecvMsgCommand(botConfig));
+        StartCommand startCommand = new StartCommand(botConfig);
+        StartRecvMsgCommand startRecvMsgCommand = new StartRecvMsgCommand(botConfig);
+        StopRecvMsgCommand stopRecvMsgCommand = new StopRecvMsgCommand(botConfig);
+
+
+        register(startCommand);
+
+        if(!"8571189674".equals(botConfig.getBotId())) {//这里先写死
+            register(startRecvMsgCommand);
+            register(stopRecvMsgCommand);
+        }
+
+
+        setCommands(null);
 
 //        registerDefaultAction((telegramClient, message) -> {
 //            SendMessage commandUnknownMessage = new SendMessage(String.valueOf(message.getChatId()),
@@ -102,4 +122,21 @@ public class WebHookHandler extends TelegramWebhookCommandBot {
         return telegramClient.execute(msg);
     }
 
+    public void setCommands(List<org.telegram.telegrambots.meta.api.objects.commands.BotCommand> cmds) {
+        Collection<IBotCommand> registeredCommands = getRegisteredCommands();
+        if(cmds == null) {
+            cmds = new ArrayList<>();
+        }
+        List<BotCommand> finalCmds = cmds;
+        registeredCommands.forEach(cmd -> {
+            finalCmds.add(new BotCommand(cmd.getCommandIdentifier(), cmd.getDescription()));
+        });
+
+        try {
+            telegramClient.execute(SetMyCommands.builder()
+                    .commands(finalCmds).build());
+        } catch (TelegramApiException e) {
+            log.error("批量注册命令失败", e.getMessage());
+        }
+    }
 }

@@ -28,7 +28,7 @@ public class StartRecvMsgCommand extends BotCommand {
     private BotConfig botConfig;
 
     public StartRecvMsgCommand(BotConfig botConfig) {
-        super("start_recv_msg", "With this command you can start receive group msg from Bot");
+        super("start_recv_msg", "开启机器人消息推送");
         this.botConfig = botConfig;
     }
 

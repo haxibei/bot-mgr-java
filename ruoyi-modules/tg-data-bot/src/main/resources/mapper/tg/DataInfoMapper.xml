@@ -8,6 +8,7 @@
         select b.*, a.user_id from agent_bind_info a
         left join data_info b on a.agent_code = b.agent_code and a.domain = b.domain
         where b.data_date = #{date} and a.user_id &lt; 0 and pause_state = 0
+          and a.domain in (select `domain` from domain_info where need_agent_level1 = 0)
     </select>
 
     <select id="getConvertConfig" resultType="com.ruoyi.model.DataScore" parameterType="java.lang.String">
@@ -15,5 +16,8 @@
     </select>
     <select id="getRenewConfig" resultType="com.ruoyi.model.DataScore" parameterType="java.lang.String">
         select config_value from sys_config where config_key = concat('renew_config_', #{botId})
+    </select>
+    <select id="getAllAgentCode" resultType="com.ruoyi.db.domain.AgentBindInfo">
+        select agent_code from data_info where `domain` = #{domain} and `level` = #{level} group by agent_code
     </select>
 </mapper>

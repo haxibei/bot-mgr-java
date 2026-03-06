@@ -29,6 +29,11 @@ public class AgentBindInfo extends BaseEntity
 
     private String botId;
 
+    @ApiModelProperty(value = "代理层级    默认  0")
+    private Integer level;
+
+    private String parentAgentCode;
+
     @Override
     public Long getPK() {
         return bindId;

@@ -83,7 +83,7 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
                 agentCode = agent.getAgentCode();
                 domain = agent.getDomain();
             }
-            MsgData msgData = getData(message,agentCode, domain, date);
+            MsgData msgData = getData(message.getChatId(),agentCode, domain, date);
             String text = ("\uD83D\uDECE "+date+" 查询结果\n➖➖➖➖➖➖➖➖➖➖\n") + msgData.getText();
             SendMessage msg = new SendMessage(message.getChat().getId().toString(), text);
             msg.setReplyMarkup(msgData.getReplyMarkup());
@@ -100,7 +100,7 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
                 agentCode = agent.getAgentCode();
                 domain = agent.getDomain();
             }
-            MsgData msgData = getData(message,agentCode, domain, date);
+            MsgData msgData = getData(message.getChatId(),agentCode, domain, date);
             String text = ("\uD83D\uDECE "+date+" 查询结果\n➖➖➖➖➖➖➖➖➖➖\n") + msgData.getText();
             SendMessage msg = new SendMessage(message.getChat().getId().toString(), text);
             msg.setReplyMarkup(msgData.getReplyMarkup());
@@ -111,7 +111,7 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
             String domain = null;
             String date = params[0];
 
-            MsgData msgData = getData(message,agentCode, domain, date);
+            MsgData msgData = getData(message.getChatId(),agentCode, domain, date);
             String text = ("\uD83D\uDECE "+(agentCode != null?("`"+agentCode+"`"):"")+" 查询结果\n➖➖➖➖➖➖➖➖➖➖\n") + msgData.getText();
             SendMessage msg = new SendMessage(message.getChat().getId().toString(), text);
             msg.setReplyMarkup(msgData.getReplyMarkup());
@@ -150,7 +150,7 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
         msgText += "代理: `"+ (agentCode == null?"无":agentCode)+ "`  " + (onlyOne?("（`"+ domain +"`）"):"")+ "\n";
         if(CollectionUtils.isNotEmpty(dataInfos)) {
             for(DataInfo dataInfo : dataInfos) {
-                msgText += (!onlyOne?("`"+ dataInfo.getDomain() +"`"):"") + "`注册人数: "+ dataInfo.getRegisterNum() +", 转化人数: "+ dataInfo.getEffectiveNum() +"（"+ dataInfo.getConvertRate() +"%）, 续存人数: "+ dataInfo.getRepeatNum() + "（"+ dataInfo.getRenewRate() +"%）` \n";
+                msgText += (!onlyOne?("`"+ dataInfo.getDomain() +"`"):"") + "`注册人数: "+ dataInfo.getRegisterNum() +", 首充人数: "+ dataInfo.getEffectiveNum() +"（"+ dataInfo.getConvertRate() +"%）, 续存人数: "+ dataInfo.getRepeatNum() + "（"+ dataInfo.getRenewRate() +"%）` \n";
 
 //                DataInfoScore dataInfoScore = buildScore(dataInfo);
 //
@@ -161,9 +161,7 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
 //
 //                }
             }
-            msgText += "➖➖➖➖➖➖➖➖➖➖\n";
         }else {
-            msgText += "➖➖➖➖➖➖➖➖➖➖\n";
             msgText += "\n暂无统计数据\n";
         }
         MsgData msgData = new MsgData();
@@ -226,7 +224,7 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
         return new DataInfoScore(convertScore, renewScore);
     }
 
-    private MsgData getData(Message message, String agentCode, String domain, String date) {
+    public MsgData getData(Long chatId, String agentCode, String domain, String date) {
 
         List<DataInfo> dataInfos = new ArrayList<>();
 
@@ -237,7 +235,7 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
             String botId = ThreadUtil.getBotId();
             queryDomain.setBotId(botId);
             QueryWrapper<DomainInfo> baseWrapper = domainInfoService.getBaseWrapper(queryDomain);
-            String sql = String.format("select domain from agent_bind_info where user_id = '%s' and bot_id = '%s'", message.getChatId(), botId);
+            String sql = String.format("select domain from agent_bind_info where user_id = '%s' and bot_id = '%s'", chatId, botId);
             if(StringUtils.isNotBlank(agentCode)) {
                 sql += String.format("and agent_code = '%s'", agentCode);
             }
@@ -247,7 +245,7 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
             String text = "";
             if(CollectionUtils.isNotEmpty(domainInfos)) {
                 AgentBindInfo queryData = new AgentBindInfo();
-                queryData.setUserId(message.getChatId());
+                queryData.setUserId(chatId);
                 queryData.setBotId(botId);
                 List<AgentBindInfo> agentBindInfos = agentBindInfoService.selectList(queryData);
 
@@ -275,8 +273,8 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
                         for(String agent : collect.keySet()) {
                             List<DataInfo> subDatas = collect.get(agent);
                             MsgData msgData = buildDataMsg(agent, null, date, subDatas);
-
                             text += msgData.getText() + "\n";
+                            text += "➖➖➖➖➖➖➖➖➖➖\n";
                         }
                     }else {
                         text += "代理: `"+ (agentCode == null?"无":agentCode)+ "`  " +("（`"+ domainInfo.getDomain() +"`）") + "\n";
@@ -298,8 +296,8 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
             queryData.setBotId(botId);
             QueryWrapper<DataInfo> baseWrapper = dataInfoService.getBaseWrapper(queryData);
 
-            String sql1 = String.format("select domain from agent_bind_info where user_id = '%s' and bot_id = '%s'", message.getChatId(), botId);
-            String sql2 = String.format("select agent_code from agent_bind_info where user_id = '%s' and bot_id = '%s'", message.getChatId(), botId);
+            String sql1 = String.format("select domain from agent_bind_info where user_id = '%s' and bot_id = '%s'", chatId, botId);
+            String sql2 = String.format("select agent_code from agent_bind_info where user_id = '%s' and bot_id = '%s'", chatId, botId);
             baseWrapper.lambda()
                     .inSql(DataInfo::getDomain, sql1)
                     .inSql(DataInfo::getAgentCode, sql2);
@@ -314,11 +312,65 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
                 MsgData msgData = buildDataMsg(agent, null, date, subDatas);
 
                 text += msgData.getText() + "\n";
+                text += "➖➖➖➖➖➖➖➖➖➖\n";
             }
             MsgData msgData = new MsgData();
             msgData.setText(text);
             return msgData;
         }
+    }
+
+    public MsgData getDataLv1(Long chatId, String agentCode, String domain, String date) {
+        DomainInfo queryDomain = new DomainInfo();
+        queryDomain.setDomain(domain);
+        String botId = ThreadUtil.getBotId();
+        queryDomain.setBotId(botId);
+
+        DomainInfo domainInfo = domainInfoService.getOne(domainInfoService.getBaseWrapper(queryDomain), false);
+
+        String text = "";
+        if(domainInfo != null) {
+            List<DataInfo> dataInfos = dataInfoService.loadRemoteDataLevel1(domainInfo, agentCode, date);
+            Iterator<DataInfo> iterator = dataInfos.iterator();
+            while(iterator.hasNext()) {
+                DataInfo next = iterator.next();
+                next.setDomain(domainInfo.getDomain());
+            }
+            if(CollectionUtils.isNotEmpty(dataInfos)) {
+                Map<String/*agentCode*/, List<DataInfo>> collect = dataInfos.stream().collect(Collectors.groupingBy(DataInfo::getAgentCode));
+
+                for(String agent : collect.keySet()) {
+                    List<DataInfo> subDatas = collect.get(agent);
+                    MsgData msgData = buildDataMsg(agent, null, date, subDatas);
+
+                    text += "日期：" + date + "  " + msgData.getText() + "\n";
+                }
+            }else {
+                text += "日期：" + date + "  " + "代理: `"+ agentCode+ "`  " +("（`"+ domainInfo.getDomain() +"`）") + "\n";
+                text += "暂无数据或获取失败\n";
+            }
+        }else {
+            text += "日期：" + date + "  " + "代理: `"+ agentCode + "`  " +("（`"+ domain +"`）") + "\n";
+            text += "暂无数据或获取失败\n";
+        }
+
+        MsgData msgData = new MsgData();
+        msgData.setText(text);
+        return msgData;
+
+    }
+
+    private void doSaveAgent(Long chatId, DomainInfo domainInfo, String agent, String parentAgent) {
+
+        AgentBindInfo agentBindInfo = new AgentBindInfo();
+        agentBindInfo.setAgentCode(agent);
+        agentBindInfo.setDomain(domainInfo.getDomain());
+        agentBindInfo.setBotId(domainInfo.getBotId());
+        agentBindInfo.setUserId(chatId);
+        agentBindInfo.setParentAgentCode(parentAgent);
+        agentBindInfo.setLevel(StringUtils.isBlank(parentAgent) ? 0 : 1);
+
+        agentBindInfoService.insertOrUpdate(agentBindInfo);
     }
 
     private MsgData getQueryDataList(Message message, String[] params) {
@@ -427,7 +479,7 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
                 agentCode = agent.getAgentCode();
                 domain = agent.getDomain();
             }
-            MsgData msgData = getData(message,agentCode, domain, dateStr);
+            MsgData msgData = getData(message.getChatId(),agentCode, domain, dateStr);
 
             String text = ("\uD83D\uDECE "+dateStr+" 查询结果\n➖➖➖➖➖➖➖➖➖➖\n") + msgData.getText();
             SendMessage msg = new SendMessage(message.getChatId().toString(), text);
@@ -475,7 +527,34 @@ public class DataInfoHandler implements ICmdHandler, IBackHandler, ICmdInputHand
 
     }
 
-    public static void main(String[] args) {
-        System.out.println(RandomUtil.randomString(8));
+    public void bindAgent(String botId, Long userId) {
+        DomainInfo queryDomain = new DomainInfo();
+        queryDomain.setBotId(botId);
+        queryDomain.setNeedAgentLevel1(1);//只有需要查询下级代理的 平台才需要直接绑定
+        QueryWrapper<DomainInfo> baseWrapper = domainInfoService.getBaseWrapper(queryDomain);
+        List<DomainInfo> domainInfos = domainInfoService.list(baseWrapper);
+
+        if(CollectionUtils.isNotEmpty(domainInfos)) {
+            //执行绑定 顶级代理
+            String date = DateUtils.getDate();
+            domainInfos.forEach(domainInfo -> {
+                log.info("执行绑定 顶级代理 {}", domainInfo.getDomain());
+                //更新顶级代理
+                dataInfoService.spiderDomainAllData(domainInfo, date);
+                //只获取顶级的 代理
+                List<AgentBindInfo> bindInfos = dataInfoService.getAllAgentCode(domainInfo.getDomain());
+                log.info("绑定的代理 {}", bindInfos);
+                for(AgentBindInfo bindInfo : bindInfos) {
+                    bindInfo.setDomain(domainInfo.getDomain());
+                    bindInfo.setLevel(0);
+                    bindInfo.setBotId(botId);
+                    bindInfo.setUserId(userId);
+                    agentBindInfoService.insertOrUpdate(bindInfo);
+                }
+                //更新下级代理
+//                dataInfoService.spiderDomainSubData(domainInfo, date);
+            });
+
+        }
     }
 }
